@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e407cf0a60ae90d4eb60bfc23c1dcdca, type: 3}
+  m_Name: RedGem
+  m_EditorClassIdentifier: 
+  id: red_gem
+  displayName: Red gem
+  description: Some red gem that can be used somewhere
+  icon: {fileID: 21300000, guid: 6eeab53684cdb1448a4f11b8302e32db, type: 3}
+  prefab: {fileID: 8004725340870077147, guid: 45c997f4d0e78a14aa6832471699c395, type: 3}
+  isConsumable: 1
+  isStackable: 0

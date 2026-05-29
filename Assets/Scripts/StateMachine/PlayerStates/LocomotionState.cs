@@ -4,10 +4,7 @@ public class LocomotionState : BaseState<PlayerController>
 {
     public LocomotionState(PlayerController controller, Animator animator) : base(controller, animator) { }
 
-    public override void OnEnter()
-    {
-        Debug.Log("Entered Locomotion State");
-    }
+    public override void OnEnter() { }
 
     public override void Update()
     {

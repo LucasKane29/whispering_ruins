@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e43b1215ebd67c429c5334951a0ddad, type: 3}
+  m_Name: StaminaPotionEffect
+  m_EditorClassIdentifier: 
+  _effectPrefab: {fileID: 7661755038233492893, guid: 8bf206ad0057dfd498da6dbccf4b47c7,
+    type: 3}
+  _restoreAmount: 25

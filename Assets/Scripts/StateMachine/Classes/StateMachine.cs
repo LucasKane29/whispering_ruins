@@ -6,6 +6,7 @@ public class StateMachine
     StateNode _current;
     Dictionary<Type, StateNode> _stateNodes = new();
     HashSet<ITransition> _anyTransitions = new();
+    public IState CurrentState => _current?.State;
 
     public void Update()
     {

@@ -1,88 +1,227 @@
+using System;
+using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerController : MonoBehaviour, IStatable
+public class PlayerController : MonoBehaviour, IStatable, IPlayerService
 {
     [Header("Гравець")]
     [Tooltip("Швидкість ходи персонажу у м/с")]
-    public float MoveSpeed = 2.0f;
+    [SerializeField] private float _moveSpeed = 2.0f;
 
     [Tooltip("Швидкість бігу персонажу у м/с")]
-    public float SprintSpeed = 5.335f;
+    [SerializeField] private float _sprintSpeed = 5.335f;
 
     [Tooltip("Наскільки швидко персонаж змінює напрямок")]
     [Range(0.0f, 0.3f)]
-    public float RotationSmoothTime = 0.12f;
+    [SerializeField] private float _rotationSmoothTime = 0.12f;
 
     [Tooltip("Прискорення та сповільнення")]
-    public float SpeedChangeRate = 10.0f;
+    [SerializeField] private float _speedChangeRate = 10.0f;
 
-    public AudioClip LandingAudioClip;
-    public AudioClip[] FootstepAudioClips;
-    [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
+    [SerializeField] private AudioClip _landingAudioClip;
+    [SerializeField] private AudioClip[] _footstepAudioClips;
+    [SerializeField] private AudioClip[] _swordAttackAudioClips;
+    [Range(0, 1)][SerializeField] private float _footstepAudioVolume = 0.5f;
+    [Range(0, 1)][SerializeField] private float _swordAttackAudioVolume = 0.5f;
 
     [Space(10)]
     [Tooltip("Висота стрибку")]
-    public float JumpHeight = 1.2f;
+    [SerializeField] private float _jumpHeight = 1.2f;
 
     [Tooltip("Персонаж використовує власне значення гравітації. Значення за замовчуванням -9.81f")]
-    public float Gravity = -15.0f;
+    [SerializeField] private float _gravity = -15.0f;
 
     [Space(10)]
     [Tooltip("Час затримки перед стрибком")]
-    public float JumpTimeout = 0.50f;
+    [SerializeField] private float _jumpTimeout = 0.50f;
 
     [Tooltip("Час, необхідний для переходу в стан падіння. Корисно для спуску по сходах")]
-    public float FallTimeout = 0.15f;
+    [SerializeField] private float _fallTimeout = 0.15f;
 
     [Header("Приземлення персонажу")]
     [Tooltip("Флаг показує чи на землі персонаж")]
-    public bool Grounded = true;
+    private bool _grounded = true;
 
     [Tooltip("Корисно для грубих поверхонь")]
-    public float GroundedOffset = -0.14f;
+    private float _groundedOffset = -0.14f;
 
     [Tooltip("Радіус перевірки на дотик до землі. Повинен відповідати радіусу CharacterController")]
-    public float GroundedRadius = 0.28f;
+    private float _groundedRadius = 0.28f;
 
     [Tooltip("Які шари персонаж використовує як землю")]
-    public LayerMask GroundLayers;
+    [SerializeField] private LayerMask _groundLayers;
 
     [Header("Cinemachine")]
     [Tooltip("Ціль для слідування, встановлена в Cinemachine Virtual Camera, за якою камера буде слідувати")]
-    public GameObject CinemachineCameraTarget;
+    [SerializeField] private GameObject _cinemachineCameraTarget;
 
-    internal const float TerminalVelocity = 53.0f;
-    internal float VerticalVelocity;
-    internal float Speed;
-    internal float AnimationBlend;
-    internal float TargetRotation;
-    internal float RotationVelocity;
-    internal float JumpTimeoutDelta;
-    internal float FallTimeoutDelta;
+    [Header("Налаштування атаки")]
+    [Tooltip("Обмеження у часі через яке можна зробити наступну атаку")]
+    [SerializeField] private float _attackCooldown = 0.5f;
+    [SerializeField] private float _attackRange = 1.0f;
+    [SerializeField] private float _attackDamage = 10.0f;
 
-    internal Animator Animator;
-    internal CharacterController Controller;
-    internal PlayerInputs Input;
-    internal GameObject MainCamera;
-    internal bool HasAnimator;
+    [Header("Налаштування витрат стаміни")]
+    [SerializeField] private float _attackStaminaCost = 10f;
+    [SerializeField] private float _sprintStaminaCost = 2f;
+    [SerializeField] private float _jumpStaminaCost = 5f;
+    [SerializeField] private float _hurtDuration = 0.5f;
+
+    private const float _terminalVelocity = 53.0f;
+    private float _verticalVelocity;
+    private float _speed;
+    private float _animationBlend;
+    private float _targetRotation;
+    private float _rotationVelocity;
+    private float _jumpTimeoutDelta;
+    private float _fallTimeoutDelta;
+
+    private Animator _animator;
+    private CharacterController _controller;
+    private PlayerInputs _input;
+    private GameObject _mainCamera;
+    private bool _hasAnimator;
+    private CountdownTimer _attackCooldownTimer;
 
     private StateMachine _stateMachine;
 
-    private void Awake()
+
+    public bool IsHurt { get; set; }
+    public bool IsDead { get; private set; }
+
+    public bool Grounded => _grounded;
+    public float JumpHeight => _jumpHeight;
+    public float Gravity => _gravity;
+    public float JumpTimeout => _jumpTimeout;
+    public float FallTimeout => _fallTimeout;
+    public float Speed => _speed;
+    public float AnimationBlend => _animationBlend;
+    public float TargetRotation => _targetRotation;
+    public float RotationVelocity => _rotationVelocity;
+    public Animator Animator => _animator;
+    public CharacterController Controller => _controller;
+    public PlayerInputs Input => _input;
+    public GameObject MainCamera => _mainCamera;
+    public bool HasAnimator => _hasAnimator;
+    public static float TerminalVelocity => _terminalVelocity;
+
+    private Health _health;
+
+    private Stamina _stamina;
+    private CameraService _cameraService;
+
+    private bool _inputBlocked;
+    private InventoryUIService _inventoryUIService;
+    public float JumpTimeoutDelta
     {
-        if (MainCamera == null)
-            MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        get => _jumpTimeoutDelta;
+        set => _jumpTimeoutDelta = value;
     }
+    public float VerticalVelocity
+    {
+        get => _verticalVelocity;
+        set => _verticalVelocity = value;
+    }
+
+    public float FallTimeoutDelta
+    {
+        get => _fallTimeoutDelta;
+        set => _fallTimeoutDelta = value;
+    }
+
+    public Transform Transform => _controller.transform;
+
+    public Health Health => _health;
+    public Stamina Stamina => _stamina;
+
+    private void OnDisable()
+    {
+        DialogueManager.Instance.OnDialogueStarted -= BlockInput;
+        DialogueManager.Instance.OnDialogueEnded -= UnblockInput;
+    }
+
+    private void BlockInput()
+    {
+        _inputBlocked = true;
+        _input.move = Vector2.zero;
+        _input.attack = false;
+        _input.look = Vector2.zero;
+        _input.sprint = false;
+        _input.jump = false;
+        _speed = 0f;
+        _input.inventory = false;
+    }
+
+    private void UnblockInput()
+    {
+        StartCoroutine(UnblockNextFrame());
+    }
+
+    private void OnDestroy()
+    {
+        IServiceLocator.Instance.TryUnregisterService<IPlayerService, PlayerController>(this);
+        if (_inventoryUIService != null)
+        {
+            _inventoryUIService.OnInventoryOpened -= BlockInput;
+            _inventoryUIService.OnInventoryClosed -= UnblockInput;
+        }
+        var pauseService = IServiceLocator.Instance.GetService<IPauseService>();
+        if (pauseService != null)
+        {
+            pauseService.OnPaused -= BlockInput;
+            pauseService.OnResumed -= UnblockInput;
+        }
+    }
+
+    void Awake() 
+    { 
+        if (IServiceLocator.Instance != null)
+        {
+            IServiceLocator.Instance.TryRegisterService<IPlayerService, PlayerController>(this);
+        }
+    }
+      
 
     private void Start()
     {
+        DialogueManager.Instance.OnDialogueStarted += BlockInput;
+        DialogueManager.Instance.OnDialogueEnded += UnblockInput;
+        _inventoryUIService = IServiceLocator.Instance.GetService<IInventoryUIService>() as InventoryUIService;
+        if (_inventoryUIService != null)
+        {
+            _inventoryUIService.OnInventoryOpened += BlockInput;
+            _inventoryUIService.OnInventoryClosed += UnblockInput;
+        }
 
-        HasAnimator = TryGetComponent(out Animator);
-        Controller = GetComponent<CharacterController>();
-        Input = GetComponent<PlayerInputs>();
-        JumpTimeoutDelta = JumpTimeout;
-        FallTimeoutDelta = FallTimeout;
+        var pauseService = IServiceLocator.Instance.GetService<IPauseService>();
+        if (pauseService != null)
+        {
+            pauseService.OnPaused += BlockInput;
+            pauseService.OnResumed += UnblockInput;
+        }
+
+
+        _attackCooldownTimer = new CountdownTimer(_attackCooldown);
+        _attackCooldownTimer.OnTimerStop += () => _input.attack = false;
+        _health = GetComponent<Health>();
+        _stamina = GetComponent<Stamina>();
+        if (_health != null)
+        {
+            _health.OnDamaged += () => IsHurt = true;
+            _health.OnDeath   += () => IsDead = true;
+        }
+
+        _cameraService = IServiceLocator.Instance.GetService<CameraService>();
+        if (_mainCamera == null)
+            _mainCamera = _cameraService.Transform.gameObject;
+
+        _hasAnimator = TryGetComponent(out _animator);
+        _controller = GetComponent<CharacterController>();
+        _input = GetComponent<PlayerInputs>();
+        _jumpTimeoutDelta = _jumpTimeout;
+        _fallTimeoutDelta = _fallTimeout;
 
         SetupStateMachine();
     }
@@ -90,13 +229,33 @@ public class PlayerController : MonoBehaviour, IStatable
     private void SetupStateMachine()
     {
         _stateMachine = new StateMachine();
-        var locomotionState = new LocomotionState(this, Animator);
-        var jumpState = new JumpState(this, Animator);
+        var locomotionState = new LocomotionState(this, _animator);
+        var jumpState       = new JumpState(this, _animator, _stamina, _jumpStaminaCost);
+        var attackState     = new PlayerAttackState(this, _animator);
+        var hurtState       = new PlayerHurtState(this, _animator, _hurtDuration);
+        var dieState        = new PlayerDieState(this, _animator);
 
-        At(locomotionState, jumpState, new FunctionPredicate(() => Grounded && Input.jump && JumpTimeoutDelta <= 0f));
-        At(jumpState, locomotionState, new FunctionPredicate(() => Grounded));
+        At(locomotionState, jumpState, new FunctionPredicate(() => _grounded && _input.jump && _jumpTimeoutDelta <= 0f && (_stamina != null && _stamina.HasEnoughStamina(_jumpStaminaCost))));
+        At(jumpState, locomotionState, new FunctionPredicate(() => _grounded && _verticalVelocity <= 0f));
+        At(locomotionState, attackState, new FunctionPredicate(() => !_attackCooldownTimer.IsRunning && _input.attack && (_stamina != null && _stamina.HasEnoughStamina(_attackStaminaCost))));
+        At(attackState, locomotionState, new FunctionPredicate(() => !_attackCooldownTimer.IsRunning));
+        At(hurtState, locomotionState, new FunctionPredicate(() => !IsHurt));
+        Any(hurtState, new FunctionPredicate(() => IsHurt && !IsDead));
+        Any(dieState,  new FunctionPredicate(() => IsDead));
+        Any(locomotionState, new FunctionPredicate(ReturnToLocomotionState));
 
         _stateMachine.SetState(locomotionState);
+    }
+
+    private bool ReturnToLocomotionState()
+    {
+        return _grounded
+            && !_attackCooldownTimer.IsRunning
+            && !_input.jump
+            && !_input.attack
+            && _verticalVelocity <= 0f
+            && !IsHurt
+            && !IsDead;
     }
 
     public void At(IState from, IState to, IPredicate condition) => _stateMachine.AddTransition(from, to, condition);
@@ -104,92 +263,160 @@ public class PlayerController : MonoBehaviour, IStatable
 
     private void Update()
     {
-        HasAnimator = TryGetComponent(out Animator);
+        if (_input.inventory)
+        {
+            _inventoryUIService ??= IServiceLocator.Instance.GetService<IInventoryUIService>() as InventoryUIService;
+            _inventoryUIService?.Open();
+        }
         GroundedCheck();
+        if (_inputBlocked)
+        {
+            ApplyGravityOnly();
+            return;
+        } 
+            
         _stateMachine.Update();
+        _attackCooldownTimer.Tick(Time.deltaTime);
     }
 
     internal void HandleMovement()
     {
-        float targetSpeed = Input.sprint ? SprintSpeed : MoveSpeed;
-        if (Input.move == Vector2.zero) targetSpeed = 0f;
+        float targetSpeed = _moveSpeed;
+        if (_input.sprint)
+        {
+            if (_stamina != null && _stamina.HasEnoughStamina(_sprintStaminaCost * Time.deltaTime))
+            {
+                _stamina?.UseStamina(_sprintStaminaCost * Time.deltaTime);
+                targetSpeed = _sprintSpeed;
+            }
+        }
 
-        float currentHorizontalSpeed = new Vector3(Controller.velocity.x, 0f, Controller.velocity.z).magnitude;
+        if (_input.move == Vector2.zero) targetSpeed = 0f;
+
+        float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0f, _controller.velocity.z).magnitude;
         float speedOffset = 0.1f;
-        float inputMagnitude = Input.analogMovement ? Input.move.magnitude : 1f;
+        float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
 
         if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
         {
-            Speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
-            Speed = Mathf.Round(Speed * 1000f) / 1000f;
+            _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * _speedChangeRate);
+            _speed = Mathf.Round(_speed * 1000f) / 1000f;
         }
         else
         {
-            Speed = targetSpeed;
+            _speed = targetSpeed;
         }
 
-        AnimationBlend = Mathf.Lerp(AnimationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-        if (AnimationBlend < 0.01f) AnimationBlend = 0f;
+        _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * _speedChangeRate);
+        if (_animationBlend < 0.01f) _animationBlend = 0f;
 
-        Vector3 inputDirection = new Vector3(Input.move.x, 0f, Input.move.y).normalized;
+        Vector3 inputDirection = new Vector3(_input.move.x, 0f, _input.move.y).normalized;
 
-        if (Input.move != Vector2.zero)
+        if (_input.move != Vector2.zero)
         {
-            TargetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + MainCamera.transform.eulerAngles.y;
-            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, TargetRotation, ref RotationVelocity, RotationSmoothTime);
+            _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
+            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, _rotationSmoothTime);
             transform.rotation = Quaternion.Euler(0f, rotation, 0f);
         }
 
-        Vector3 targetDirection = Quaternion.Euler(0f, TargetRotation, 0f) * Vector3.forward;
-        Controller.Move(targetDirection.normalized * (Speed * Time.deltaTime) + new Vector3(0f, VerticalVelocity, 0f) * Time.deltaTime);
+        Vector3 targetDirection = Quaternion.Euler(0f, _targetRotation, 0f) * Vector3.forward;
+        _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0f, _verticalVelocity, 0f) * Time.deltaTime);
 
-        if (HasAnimator)
+        if (_hasAnimator)
         {
-            Animator.SetFloat(PlayerAnimIDs.Speed, AnimationBlend);
-            Animator.SetFloat(PlayerAnimIDs.MotionSpeed, inputMagnitude);
+            _animator.SetFloat(PlayerAnimIDs.Speed, _animationBlend);
+            _animator.SetFloat(PlayerAnimIDs.MotionSpeed, inputMagnitude);
         }
     }
 
     private void GroundedCheck()
     {
-        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-        Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - _groundedOffset, transform.position.z);
+        _grounded = Physics.CheckSphere(spherePosition, _groundedRadius, _groundLayers, QueryTriggerInteraction.Ignore);
 
-        if (HasAnimator)
-            Animator.SetBool(PlayerAnimIDs.Grounded, Grounded);
+        if (_hasAnimator)
+            _animator.SetBool(PlayerAnimIDs.Grounded, _grounded);
     }
 
-    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+    public void Attack()
     {
-        if (lfAngle < -360f) lfAngle += 360f;
-        if (lfAngle > 360f) lfAngle -= 360f;
-        return Mathf.Clamp(lfAngle, lfMin, lfMax);
+        if (!_attackCooldownTimer.IsRunning)
+        {
+            if(_stamina != null && !_stamina.HasEnoughStamina(_attackStaminaCost))
+            {
+                return;
+            }
+            _stamina?.UseStamina(_attackStaminaCost);
+            _attackCooldownTimer.Start();
+            if (_swordAttackAudioClips.Length > 0)
+            {
+                var index = Random.Range(0, _swordAttackAudioClips.Length);
+                IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_swordAttackAudioClips[index], transform.TransformPoint(_controller.center), _swordAttackAudioVolume);
+            }
+            Vector3 attackPosition = transform.position;
+            Collider[] hitColliders = Physics.OverlapSphere(attackPosition, _attackRange);
+            var hitHealthComponents = new System.Collections.Generic.HashSet<Health>();
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("Enemy"))
+                {
+                    var health = hitCollider.GetComponent<Health>();
+                    if (health != null && hitHealthComponents.Add(health))
+                        health.TakeDamage(_attackDamage);
+                }
+            }
+
+        }
+    }
+
+    private void ApplyGravityOnly()
+    {
+        if (_grounded)
+        {
+            _verticalVelocity = -2f;
+        }
+        else
+        {
+            _verticalVelocity += _gravity * Time.deltaTime;
+            if (_verticalVelocity > -TerminalVelocity)
+                _verticalVelocity = _gravity * Time.deltaTime;
+        }
+        _controller.Move(new Vector3(0f, _verticalVelocity, 0f) * Time.deltaTime);
     }
 
     private void OnDrawGizmosSelected()
     {
         Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
         Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
-        Gizmos.color = Grounded ? transparentGreen : transparentRed;
-        Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
+        Gizmos.color = _grounded ? transparentGreen : transparentRed;
+        Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - _groundedOffset, transform.position.z), _groundedRadius);
+        Vector3 attackPosition = transform.position + transform.forward;
+        Gizmos.DrawSphere(attackPosition, _attackRange);
     }
 
     private void OnFootstep(AnimationEvent animationEvent)
     {
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
-            if (FootstepAudioClips.Length > 0)
+            if (_footstepAudioClips.Length > 0)
             {
-                var index = Random.Range(0, FootstepAudioClips.Length);
-                AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(Controller.center), FootstepAudioVolume);
+                var index = Random.Range(0, _footstepAudioClips.Length);
+                IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_footstepAudioClips[index], transform.TransformPoint(_controller.center), _footstepAudioVolume);
             }
         }
     }
 
     private void OnLand(AnimationEvent animationEvent)
     {
-        Debug.Log(animationEvent.animatorClipInfo.weight);
         if (animationEvent.animatorClipInfo.weight > 0.1f)
-            AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(Controller.center), FootstepAudioVolume);
+            IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_landingAudioClip, transform.TransformPoint(_controller.center), _footstepAudioVolume);
+    }
+
+    private IEnumerator UnblockNextFrame()
+    {
+        _input.attack = false;
+        yield return null;
+        _inputBlocked = false;
+        _input.enabled = true;
     }
 }
