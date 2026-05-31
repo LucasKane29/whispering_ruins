@@ -113,7 +113,6 @@ public class SaveService : MonoBehaviour, ISaveService
         }
 
         _pendingLoad = data;
-        Save();
     }
 
     public void DeleteSave()

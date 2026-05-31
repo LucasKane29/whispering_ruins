@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1aef64daab5834a84b1e06c3e1d82d, type: 3}
+  m_Name: Room05PuzzleText
+  m_EditorClassIdentifier: 
+  _lines:
+  - _speakerName: Suspicious Crystal
+    _dialogueText: The lanterns lost their sacred light,
+  - _speakerName: Suspicious Crystal
+    _dialogueText: Their colors twisted by the night.
+  - _speakerName: Suspicious Crystal
+    _dialogueText: 'Look upon the painted wall -
+
+'
+  - _speakerName: Suspicious Crystal
+    _dialogueText: The ancient hues will guide them all.

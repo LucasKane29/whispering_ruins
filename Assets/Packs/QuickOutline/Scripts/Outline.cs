@@ -150,6 +150,10 @@ public class Outline : MonoBehaviour {
     }
   }
 
+  public void RefreshRenderers() {
+    renderers = GetComponentsInChildren<Renderer>();
+  }
+
   void OnDestroy() {
 
     // Destroy material instances

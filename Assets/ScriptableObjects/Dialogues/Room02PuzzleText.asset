@@ -14,12 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _lines:
   - _speakerName: Suspicious Crystal
-    _dialogueText: The lanterns lost their sacred light,
+    _dialogueText: "The guardians lost their ancient way,\r"
   - _speakerName: Suspicious Crystal
-    _dialogueText: Their colors twisted by the night.
+    _dialogueText: "Their eyes from truth have turned away.\r\r"
   - _speakerName: Suspicious Crystal
-    _dialogueText: 'Look upon the painted wall -
-
-'
+    _dialogueText: "Face them where the light still gleams - \r\r"
   - _speakerName: Suspicious Crystal
-    _dialogueText: The ancient hues will guide them all.
+    _dialogueText: "The center stone of fading dreams.\r\r"

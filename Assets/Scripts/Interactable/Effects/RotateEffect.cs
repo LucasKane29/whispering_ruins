@@ -1,31 +1,41 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RotateEffect : MonoBehaviour, IInteractionEffect
 {
-    [SerializeField] private Vector3 _axis = Vector3.right;
+    [SerializeField] private Vector3 _axis = Vector3.up;
     [SerializeField] private float _targetAngle = 90f;
     [SerializeField] private float _duration = 1f;
     [SerializeField] private AnimationCurve _easeCurve;
     [SerializeField] private AudioClip _rotateSound;
 
-    private AudioSource _audioSource;
+    public event Action OnRotationComplete;
+
     private bool _isRotating;
+    private Coroutine _rotateCoroutine;
 
     public void Execute()
     {
         if (!_isRotating)
         {
             _isRotating = true;
-            StartCoroutine(RotateCoroutine());
+            _rotateCoroutine = StartCoroutine(RotateCoroutine());
         }
+    }
+
+    public void ResetRotation(Quaternion targetRotation)
+    {
+        if (_rotateCoroutine != null)
+            StopCoroutine(_rotateCoroutine);
+        _isRotating = false;
+        transform.rotation = targetRotation;
     }
 
     private IEnumerator RotateCoroutine()
     {
         Quaternion startRot = transform.rotation;
-        Quaternion endRot = startRot * Quaternion.AngleAxis(_targetAngle, _axis);
+        Quaternion endRot = Quaternion.AngleAxis(_targetAngle, _axis) * startRot;
         float elapsed = 0f;
         while (elapsed < _duration)
         {
@@ -37,5 +47,6 @@ public class RotateEffect : MonoBehaviour, IInteractionEffect
         }
         transform.rotation = endRot;
         _isRotating = false;
+        OnRotationComplete?.Invoke();
     }
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2094417197771082167}
   - component: {fileID: 6051012008966619974}
   - component: {fileID: 6018433639544114903}
+  - component: {fileID: 3765919139675520519}
   m_Layer: 10
   m_Name: GreenGem
   m_TagString: Untagged
@@ -64,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 514b61678af6a804b9537b76976bcf69, type: 2}
+  - {fileID: 2100000, guid: 1ea2a58e1f22f5a44a9e22d891de29d9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -122,6 +123,33 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.008424027, y: 0.019042127, z: 0.008640661}
   m_Center: {x: -0.00022134307, y: -0.000000009313225, z: -3.145341e-18}
+--- !u!114 &3765919139675520519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2876240917494758003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6497bb0ae697a3c41866904d8d469388, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _onInsertedIntoSocket:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3548206899181627902}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!1 &3548206899181627902
 GameObject:
   m_ObjectHideFlags: 0

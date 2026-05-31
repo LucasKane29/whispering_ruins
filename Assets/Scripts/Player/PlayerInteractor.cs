@@ -53,7 +53,8 @@ public class PlayerInteractor : MonoBehaviour
         {
             if(collider.TryGetComponent<IInteractable>(out IInteractable interactable))
             {
-                return new InteractableItem() { Interactable = interactable, Transform = collider.transform};
+                Transform anchor = collider.transform.Find("HintAnchor") ?? collider.transform;
+                return new InteractableItem() { Interactable = interactable, Transform = anchor };
             }
         }
         return new InteractableItem() { Interactable = null, Transform = null};

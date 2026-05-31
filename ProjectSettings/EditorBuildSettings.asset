@@ -19,13 +19,25 @@ EditorBuildSettings:
     guid: ebe92f345c472264e8fe4fecd765a801
   - enabled: 1
     path: Assets/Scenes/Room02Scene.unity
-    guid: 5635d2b67c9cb8049af8af0b98d236be
+    guid: 02c8307ad25c5e444b2a3da9f0f6d152
   - enabled: 1
     path: Assets/Scenes/Room03Scene.unity
+    guid: 5c3aab9ec5d9f1f49b9bcbd9ec6ba115
+  - enabled: 1
+    path: Assets/Scenes/Room04Scene.unity
+    guid: e4a94283b1b8ab54787bd050d3bd7c46
+  - enabled: 1
+    path: Assets/Scenes/Room05Scene.unity
+    guid: 5635d2b67c9cb8049af8af0b98d236be
+  - enabled: 1
+    path: Assets/Scenes/RoomFinalScene.unity
     guid: 9427ce9fee1765847a5290fcaebb4d31
   - enabled: 1
     path: Assets/Scenes/GameOverScene.unity
     guid: 5fd99d9b0d60a854792843dde4a19782
+  - enabled: 1
+    path: Assets/Scenes/FinalScene.unity
+    guid: 114a33b3fca3af74db2baace49eb2c05
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7,
       type: 2}

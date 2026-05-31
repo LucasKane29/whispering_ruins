@@ -44,7 +44,7 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5529412, g: 0.07450981, b: 0.023529414, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 3313944938610556432}
   - component: {fileID: -8960002492266295512}
   - component: {fileID: -8776973433362038315}
+  - component: {fileID: -3315579477045381702}
   m_Layer: 10
   m_Name: RedGem
   m_TagString: Untagged
@@ -182,7 +183,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 514b61678af6a804b9537b76976bcf69, type: 2}
+  - {fileID: 2100000, guid: 6acfbdad51bf2604ebb7d232f7493416, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -240,3 +241,30 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.008424036, y: 0.019042127, z: 0.008640661}
   m_Center: {x: -0.00022134773, y: -0.000000009313225, z: -3.1454072e-18}
+--- !u!114 &-3315579477045381702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8004725340870077147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6497bb0ae697a3c41866904d8d469388, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _onInsertedIntoSocket:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3725721478522656024}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2

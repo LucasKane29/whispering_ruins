@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -36,6 +37,7 @@ public class BossController : MonoBehaviour, IStatable
     [SerializeField] private float _aoeDamage = 25f;
     [SerializeField] private float _emergeSampleRadius = 5f;
     [SerializeField] private string _bossName = string.Empty;
+    [SerializeField] private EventChannel _onBossKilled;
 
     public event Action OnDeathAnimationComplete;
     public event Action OnBossActivated;
@@ -198,7 +200,11 @@ public class BossController : MonoBehaviour, IStatable
             r.enabled = visible;
     }
 
-    public void NotifyDeathAnimationComplete() => OnDeathAnimationComplete?.Invoke();
+    public void NotifyDeathAnimationComplete()
+    {
+        OnDeathAnimationComplete?.Invoke();
+        _onBossKilled?.Invoke(new Empty());
+    }
 
     public void AOESpawnEvent() => OnAOEAnimationEvent?.Invoke();
 }

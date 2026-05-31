@@ -64,6 +64,9 @@ public class SceneController : MonoBehaviour
         {
             yield return _loadingOverlay.FadeOutBlack();
         }
+
+        IServiceLocator.Instance.GetService<ISaveService>()?.Save();
+
         _isBusy = false;
     }
 

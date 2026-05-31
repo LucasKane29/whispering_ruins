@@ -247,7 +247,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: LanternPedestal
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3257551927081595641, guid: 6af7d808a0a498643b6db3c4774b8ae4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

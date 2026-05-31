@@ -4,20 +4,16 @@ using System.Numerics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[System.Serializable]
-public struct PlayerData
-{
-    public float health;
-    public float stamina;
-    public int souls;
-}
-
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private IntEventChannel _soulCountChannel;
     [SerializeField] private IntEventChannel _onSoulCountChangedChannel;
+    [SerializeField] private EventChannel _onFinalBossKilled;
 
-    public PlayerData SavedPlayerData;
+    private bool _isFinalBossKilled = false;
+
+    public bool IsFinalBossKilled => _isFinalBossKilled;
+
     public static GameManager Instance { get; private set; }
     public int Souls { get; private set; }
 
@@ -35,11 +31,15 @@ public class GameManager : MonoBehaviour
         }
         if (_soulCountChannel != null)
             _soulCountChannel.OnEventRaised += AddSouls;
+        if (_onFinalBossKilled != null)
+            _onFinalBossKilled.OnEventRaised += SetFinalBossKilled;
     }
     private void OnDestroy()
     {
         if (_soulCountChannel != null)
             _soulCountChannel.OnEventRaised -= AddSouls;
+        if (_onFinalBossKilled != null)
+            _onFinalBossKilled.OnEventRaised -= SetFinalBossKilled;
     }
 
     public void AddSouls(int amount)
@@ -54,14 +54,6 @@ public class GameManager : MonoBehaviour
         Souls = amount;
         if (delta != 0)
             _onSoulCountChangedChannel?.Invoke(delta);
-    }
-
-    public void SavePlayer(float health, float stamina)
-    {
-        SavedPlayerData = new PlayerData();
-        SavedPlayerData.health = health;
-        SavedPlayerData.stamina = stamina;
-        SavedPlayerData.souls = Souls;
     }
 
     public void TriggerGameOver()
@@ -80,5 +72,10 @@ public class GameManager : MonoBehaviour
         }
 
         plan.Perform();
+    }
+
+    public void SetFinalBossKilled(Empty empty)
+    {
+        _isFinalBossKilled = true;
     }
 }
