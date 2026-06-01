@@ -59,6 +59,7 @@ public class BossMediumRangeAttackState : BossBaseState
         {
             _hasDealtDamage = true;
             playerDetector.PlayerHealth.TakeDamage(agent.MeleeDamage);
+            agent.PlaySound(agent.MediumRangeAttackSound);
         }
 
         if (stateInfo.normalizedTime >= 1f && !animator.IsInTransition(0))

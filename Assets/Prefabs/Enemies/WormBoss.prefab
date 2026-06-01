@@ -817,6 +817,24 @@ MonoBehaviour:
   _aoeDamage: 25
   _emergeSampleRadius: 5
   _bossName: Great Worm
+  _onBossKilled: {fileID: 11400000, guid: 21540e920a47c9a489129da48f5c31a4, type: 2}
+  _rewards: []
+  _deathLingerDuration: 5
+  _bossMusicClip: {fileID: 8300000, guid: fa94c7f817092c9499eb9ec5a969d893, type: 3}
+  _bossMusicFadeDuration: 1
+  _hurtSound: {fileID: 8300000, guid: 5c5a56c87176ba54499ae5b83697a90b, type: 3}
+  _deathSound: {fileID: 8300000, guid: 1d68458f74b83ea47a720fabdbb356bf, type: 3}
+  _meleeAttackSound: {fileID: 8300000, guid: f448fed9584147740b6a576042fb8160, type: 3}
+  _mediumRangeAttackSound: {fileID: 8300000, guid: f448fed9584147740b6a576042fb8160,
+    type: 3}
+  _rangedAttackSound: {fileID: 8300000, guid: 7ebe33315fd78534da408b8067369d39, type: 3}
+  _aoeAttackSound: {fileID: 8300000, guid: f448fed9584147740b6a576042fb8160, type: 3}
+  _phaseTransitionSound: {fileID: 8300000, guid: 8591843457825eb41aff83dc9a998d72,
+    type: 3}
+  _burrowSound: {fileID: 8300000, guid: 8efe2897dd42a154bb68b70bfee0134b, type: 3}
+  _emergeSound: {fileID: 8300000, guid: 74d0462228270bf46b6fbdc4cf3fe67c, type: 3}
+  _soundVolume: 1
+  _musicVolume: 1
 --- !u!114 &2653575996022973561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -830,6 +848,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 100
+  _invincibilityDuration: 0
   _channel: {fileID: 11400000, guid: bcede2594be214549b12324d68fa3973, type: 2}
 --- !u!136 &7232644700013234041
 CapsuleCollider:

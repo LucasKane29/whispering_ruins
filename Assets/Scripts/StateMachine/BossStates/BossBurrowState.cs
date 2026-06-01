@@ -66,6 +66,7 @@ public class BossBurrowState : BaseState<BossController>
             _navMeshAgent.enabled = false;
             agent.SetColliderEnabled(false);
             animator.CrossFade(BossAnimIDs.Burrow, crossFadeDuration);
+            agent.PlaySound(agent.BurrowSound);
             _phase = Phase.Diving;
         }
     }
@@ -114,6 +115,7 @@ public class BossBurrowState : BaseState<BossController>
             agent.SetVisible(true);
             _navMeshAgent.enabled = true;
             animator.CrossFade(BossAnimIDs.Emerge, crossFadeDuration);
+            agent.PlaySound(agent.EmergeSound);
             _phase = Phase.Emerging;
         }
     }

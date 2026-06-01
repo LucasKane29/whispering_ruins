@@ -15,6 +15,7 @@ public static class SceneDatabase
         public const string Room05 = "Room05";
         public const string RoomFinal = "RoomFinal";
         public const string GameOver = "GameOver";
+        public const string Credits = "Credits";
     }
 
     public class Scenes
@@ -29,5 +30,6 @@ public static class SceneDatabase
         public const string Room05 = "Room05Scene";
         public const string RoomFinal = "RoomFinalScene";
         public const string GameOver = "GameOverScene";
+        public const string Credits = "CreditsScene";
     }
 }

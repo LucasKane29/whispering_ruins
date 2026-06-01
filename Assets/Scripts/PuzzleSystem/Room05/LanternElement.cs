@@ -17,7 +17,7 @@ public class LanternElement : StatefulPuzzleElement, IInteractable
     private int _currentColorIndex;
     private int _targetColorIndex;
 
-    public bool CanInteract => !IsInTargetState && _conditions.All(c => c.IsMet);
+    public bool CanInteract => (ParentPuzzle == null || ParentPuzzle.State != PuzzleState.Solved) && _conditions.All(c => c.IsMet);
     public string InteractionText => _interactText;
     public override bool IsInTargetState => _currentColorIndex == _targetColorIndex;
 
@@ -38,12 +38,12 @@ public class LanternElement : StatefulPuzzleElement, IInteractable
 
     public string InteractHint()
     {
-        if (IsInTargetState) return string.Empty;
+        if (ParentPuzzle != null && ParentPuzzle.State == PuzzleState.Solved) return string.Empty;
         foreach (var condition in _conditions)
             if (!condition.IsMet) return condition.FailedHint;
         return _interactText;
     }
-    public void OnFocus() => _outline.enabled = !IsInTargetState;
+    public void OnFocus() => _outline.enabled = ParentPuzzle == null || ParentPuzzle.State != PuzzleState.Solved;
     public void OnFocusLost() => _outline.enabled = false;
 
     public override void ResetElement()

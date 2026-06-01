@@ -10,4 +10,5 @@ public static class PlayerAnimIDs
     public static readonly int Attack = Animator.StringToHash("Attack");
     public static readonly int Hurt   = Animator.StringToHash("GetHit01_THS");
     public static readonly int Die    = Animator.StringToHash("Die01_THS");
+    public static readonly int Dance  = Animator.StringToHash("Dance_THS");
 }

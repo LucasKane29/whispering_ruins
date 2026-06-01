@@ -29,7 +29,7 @@ public class QuickSlotService : IQuickSlotService
         var slot = GetSlot(index);
         if (slot?.Item == null) return false;
 
-        slot.Item.effect?.Execute();
+        slot.Item.effect?.Use();
 
         if (slot.Item.isConsumable)
             _inventory.Remove(slot.Item, 1);

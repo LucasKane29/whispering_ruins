@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,12 +9,22 @@ public class PauseService : MonoBehaviour, IPauseService
     public event Action OnResumed;
 
     [SerializeField] private GameObject _pauseMenuUI;
+    [SerializeField] private string[] _excludedScenes;
 
+    private HashSet<string> _excludedScenesSet;
     public bool IsPaused { get; private set; }
+
+    private static readonly HashSet<string> _nonGameplayScenes = new()
+    {
+        SceneDatabase.Scenes.MainMenu,
+        SceneDatabase.Scenes.GameOver,
+        SceneDatabase.Scenes.Credits,
+    };
 
     void Awake()
     {
         IServiceLocator.Instance.TryRegisterService<IPauseService, PauseService>(this);
+        _excludedScenesSet = new HashSet<string>(_excludedScenes ?? System.Array.Empty<string>());
     }
 
     void OnDestroy()
@@ -34,6 +45,9 @@ public class PauseService : MonoBehaviour, IPauseService
 
     public void Pause()
     {
+        var currentScene = SceneController.Instance.GetActiveSceneName() ?? string.Empty;
+        if (_nonGameplayScenes.Contains(currentScene) || _excludedScenesSet.Contains(currentScene))
+            return;
         Time.timeScale = 0f;
         _pauseMenuUI.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
@@ -68,7 +82,8 @@ public class PauseService : MonoBehaviour, IPauseService
         var plan = SceneController.Instance
             .NewTransitions()
             .Load(SceneDatabase.Slots.MainMenu, SceneDatabase.Scenes.MainMenu, setActive: true)
-            .WithOverlay();
+            .WithOverlay()
+            .WithoutSave();
 
         foreach (var slot in SceneController.Instance.GetLoadedSlots())
         {

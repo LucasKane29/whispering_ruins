@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _effectPrefab: {fileID: 7661755038233492893, guid: 8bf206ad0057dfd498da6dbccf4b47c7,
     type: 3}
+  _useSound: {fileID: 8300000, guid: 37db12005617b094d825c6e0b0fe6f0c, type: 3}
+  _useSoundVolume: 1
   _restoreAmount: 25

@@ -57,6 +57,7 @@ public class BossPhase1State : BaseState<BossController>
     public override void OnExit()
     {
         _resumeState = _innerFsm.CurrentState;
+        _innerFsm.CurrentState?.OnExit();
         agent.SetVisible(true);
         _navMeshAgent.enabled = true;
         _navMeshAgent.isStopped = true;

@@ -9,6 +9,9 @@ public class LoadingSceneManager : MonoBehaviour
         SceneController.Instance
             .NewTransitions()
             .Load(SceneDatabase.Slots.MainMenu, SceneDatabase.Scenes.MainMenu)
+            .WithOverlay()
+            .WithoutMinimumDisplay()
+            .WithoutSave()
             .Perform();
     }
 }

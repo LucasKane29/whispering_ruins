@@ -2,13 +2,18 @@ using UnityEngine;
 
 public class PlayerDieState : BaseState<PlayerController>
 {
-    private bool _gameOverTriggered;
+    private readonly CountdownTimer _lingerTimer;
+    private bool _animationFinished;
 
-    public PlayerDieState(PlayerController controller, Animator animator) : base(controller, animator) { }
+    public PlayerDieState(PlayerController controller, Animator animator, float lingerDuration) : base(controller, animator)
+    {
+        _lingerTimer = new CountdownTimer(lingerDuration);
+        _lingerTimer.OnTimerStop += () => GameManager.Instance.TriggerGameOver();
+    }
 
     public override void OnEnter()
     {
-        _gameOverTriggered = false;
+        _animationFinished = false;
         if (agent.HasAnimator)
             animator.CrossFade(PlayerAnimIDs.Die, crossFadeDuration);
     }
@@ -22,13 +27,15 @@ public class PlayerDieState : BaseState<PlayerController>
 
         agent.Controller.Move(new Vector3(0f, agent.VerticalVelocity, 0f) * Time.deltaTime);
 
-        if (_gameOverTriggered || !agent.HasAnimator) return;
+        _lingerTimer.Tick(Time.deltaTime);
+
+        if (_animationFinished || !agent.HasAnimator) return;
 
         var info = animator.GetCurrentAnimatorStateInfo(0);
         if (info.shortNameHash == PlayerAnimIDs.Die && info.normalizedTime >= 1f && !animator.IsInTransition(0))
         {
-            _gameOverTriggered = true;
-            GameManager.Instance.TriggerGameOver();
+            _animationFinished = true;
+            _lingerTimer.Start();
         }
     }
 }

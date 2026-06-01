@@ -9,6 +9,7 @@ public class RotateEffect : MonoBehaviour, IInteractionEffect
     [SerializeField] private float _duration = 1f;
     [SerializeField] private AnimationCurve _easeCurve;
     [SerializeField] private AudioClip _rotateSound;
+    [Range(0f, 1f)][SerializeField] private float _soundVolume = 1f;
 
     public event Action OnRotationComplete;
 
@@ -34,6 +35,7 @@ public class RotateEffect : MonoBehaviour, IInteractionEffect
 
     private IEnumerator RotateCoroutine()
     {
+        IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_rotateSound, transform.position, _soundVolume);
         Quaternion startRot = transform.rotation;
         Quaternion endRot = Quaternion.AngleAxis(_targetAngle, _axis) * startRot;
         float elapsed = 0f;

@@ -20,6 +20,7 @@ public class BossPhaseTransitionState : BaseState<BossController>
         _hasTriggeredPhase2 = false;
         _navMeshAgent.isStopped = true;
         animator.CrossFade(BossAnimIDs.PhaseTransition, crossFadeDuration);
+        agent.PlaySound(agent.PhaseTransitionSound);
     }
 
     public override void Update()

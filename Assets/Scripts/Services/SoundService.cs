@@ -3,13 +3,27 @@ using UnityEngine;
 
 public class SoundService : MonoBehaviour, ISoundService
 {
-
     [SerializeField] private AudioSource _sfxSource;
     [SerializeField] private AudioSource _musicSource;
+
+    private const string MusicVolumeKey = "MusicVolume";
+    private const string SfxVolumeKey   = "SfxVolume";
+
+    private float _masterMusicVolume = 1f;
+    private float _masterSfxVolume   = 1f;
+    private float _currentClipVolume = 1f;
+
+    private Coroutine _musicCoroutine;
+    private AudioClip _currentClip;
+
+    public float MusicVolume => _masterMusicVolume;
+    public float SfxVolume   => _masterSfxVolume;
 
     void Awake()
     {
         IServiceLocator.Instance.TryRegisterService<ISoundService, SoundService>(this);
+        _masterMusicVolume = PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
+        _masterSfxVolume   = PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
     }
 
     void OnDestroy()
@@ -20,36 +34,67 @@ public class SoundService : MonoBehaviour, ISoundService
         }
     }
 
-    public void PlayMusic(AudioClip clip, float fadeDuration = 0f)
+    public void PlayMusic(AudioClip clip, float fadeDuration = 0f, bool loop = true, float volume = 1f)
     {
+        if (_currentClip == clip) return;
+
+        CancelMusicCoroutine();
+        _currentClip = clip;
+        _currentClipVolume = volume;
+
+        float finalVolume = volume * _masterMusicVolume;
+        if (fadeDuration > 0f && _musicSource.isPlaying)
+            _musicCoroutine = StartCoroutine(CrossfadeMusic(clip, loop, finalVolume, fadeDuration));
+        else
+        {
+            _musicSource.Stop();
+            _musicSource.clip = clip;
+            _musicSource.loop = loop;
+            _musicSource.volume = finalVolume;
+            _musicSource.Play();
+        }
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        _masterMusicVolume = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat(MusicVolumeKey, _masterMusicVolume);
         if (_musicSource.isPlaying)
-            StopMusic(0f); // або можна зробити crossfade пізніше
+            _musicSource.volume = _currentClipVolume * _masterMusicVolume;
+    }
 
-        _musicSource.clip = clip;
-        _musicSource.volume = fadeDuration > 0f ? 0f : 1f;
-        _musicSource.Play();
-
-        if (fadeDuration > 0f)
-            StartCoroutine(FadeVolume(_musicSource, 0f, 1f, fadeDuration));
+    public void SetSfxVolume(float volume)
+    {
+        _masterSfxVolume = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat(SfxVolumeKey, _masterSfxVolume);
     }
 
     public void StopMusic(float fadeDuration = 0f)
     {
         if (!_musicSource.isPlaying) return;
 
+        CancelMusicCoroutine();
+
         if (fadeDuration > 0f)
-            StartCoroutine(FadeAndStop(_musicSource, fadeDuration));
+            _musicCoroutine = StartCoroutine(FadeAndStop(_musicSource, fadeDuration));
         else
             _musicSource.Stop();
     }
 
     public void PlayOneShot(AudioClip clip, Vector3 position, float volume = 1f)
-    => AudioSource.PlayClipAtPoint(clip, position, volume);
+        => AudioSource.PlayClipAtPoint(clip, position, volume * _masterSfxVolume);
 
     public void Play2D(AudioClip clip, float volume = 1f)
     {
-        _sfxSource.volume = volume;
+        _sfxSource.volume = volume * _masterSfxVolume;
         _sfxSource.PlayOneShot(clip);
+    }
+
+    private void CancelMusicCoroutine()
+    {
+        if (_musicCoroutine == null) return;
+        StopCoroutine(_musicCoroutine);
+        _musicCoroutine = null;
     }
 
     private IEnumerator FadeVolume(AudioSource source, float from, float to, float duration)
@@ -57,7 +102,7 @@ public class SoundService : MonoBehaviour, ISoundService
         float elapsed = 0f;
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             source.volume = Mathf.Lerp(from, to, elapsed / duration);
             yield return null;
         }
@@ -68,5 +113,17 @@ public class SoundService : MonoBehaviour, ISoundService
     {
         yield return FadeVolume(source, source.volume, 0f, duration);
         source.Stop();
+    }
+
+    private IEnumerator CrossfadeMusic(AudioClip newClip, bool loop, float volume, float duration)
+    {
+        float half = duration * 0.5f;
+        yield return FadeVolume(_musicSource, _musicSource.volume, 0f, half);
+        _musicSource.Stop();
+        _musicSource.clip = newClip;
+        _musicSource.loop = loop;
+        _musicSource.volume = 0f;
+        _musicSource.Play();
+        yield return FadeVolume(_musicSource, 0f, volume, half);
     }
 }

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 9115130533251617120}
   - component: {fileID: 6694032161811511176}
   - component: {fileID: 3896881940629257134}
+  - component: {fileID: 6434661236826365113}
   m_Layer: 5
   m_Name: MainMenuButton
   m_TagString: Untagged
@@ -118,6 +119,21 @@ MonoBehaviour:
   _label: {fileID: 277000609755479055}
   _normalColor: {r: 1, g: 1, b: 1, a: 1}
   _hoverColor: {r: 0.95686275, g: 0.4509804, b: 0, a: 1}
+--- !u!114 &6434661236826365113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1264971067676568051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a94af245a01f04bae5c04141e1bc8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hoverSound: {fileID: 8300000, guid: 63fc8489bf8cc2f49b441651b5ec1352, type: 3}
+  _clickSound: {fileID: 8300000, guid: cdd88b20496227846980296df11a3dac, type: 3}
+  _volume: 0.1
 --- !u!1 &1344701924747605183
 GameObject:
   m_ObjectHideFlags: 0
@@ -130,6 +146,7 @@ GameObject:
   - component: {fileID: 6181349273900347104}
   - component: {fileID: 5676911514397079662}
   - component: {fileID: 3933916504940012856}
+  - component: {fileID: 864896735869908448}
   m_Layer: 5
   m_Name: ResumeButton
   m_TagString: Untagged
@@ -236,6 +253,21 @@ MonoBehaviour:
   _label: {fileID: 2151079528817041747}
   _normalColor: {r: 1, g: 1, b: 1, a: 1}
   _hoverColor: {r: 0.95686275, g: 0.4509804, b: 0, a: 1}
+--- !u!114 &864896735869908448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344701924747605183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a94af245a01f04bae5c04141e1bc8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hoverSound: {fileID: 8300000, guid: 63fc8489bf8cc2f49b441651b5ec1352, type: 3}
+  _clickSound: {fileID: 8300000, guid: cdd88b20496227846980296df11a3dac, type: 3}
+  _volume: 0.1
 --- !u!1 &2880338757736518491
 GameObject:
   m_ObjectHideFlags: 0

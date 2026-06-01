@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(PlayerDetector))]
@@ -15,6 +16,13 @@ public class EnemyController : MonoBehaviour, IStatable
     [SerializeField] private float _hurtCooldown = 0.85f;
     [SerializeField] private int _deathScore = 50;
     [SerializeField] private IntEventChannel _channel;
+
+    [Header("Sounds")]
+    [SerializeField] private AudioClip _hurtSound;
+    [SerializeField] private AudioClip _deathSound;
+    [SerializeField] private AudioClip[] _attackSounds;
+    [SerializeField] private AudioClip[] _footstepSounds;
+    [Range(0f, 1f)][SerializeField] private float _soundVolume = 1f;
     public event Action OnDeathAnimationComplete;
 
     private StateMachine _stateMachine;
@@ -70,6 +78,7 @@ public class EnemyController : MonoBehaviour, IStatable
         {
             IsHurt = true;
             _hurtTimer.Start();
+            PlaySound(_hurtSound);
 
             if (_stateMachine.CurrentState is EnemyHurtState hurtState)
                 hurtState.ReTrigger();
@@ -79,6 +88,7 @@ public class EnemyController : MonoBehaviour, IStatable
     private void HandleDeath()
     {
         IsDead = true;
+        PlaySound(_deathSound);
     }
 
     private void Start()
@@ -119,14 +129,30 @@ public class EnemyController : MonoBehaviour, IStatable
 
     public void Attack()
     {
-        if (_attackTimer.IsRunning) 
+        if (_attackTimer.IsRunning)
             return;
         _attackTimer.Start();
         _playerDetector.PlayerHealth.TakeDamage(_attackDamage);
+        if (_attackSounds.Length > 0)
+            PlaySound(_attackSounds[Random.Range(0, _attackSounds.Length)]);
     }
 
     public void NotifyDeathAnimationComplete()
     {
         OnDeathAnimationComplete?.Invoke();
+    }
+
+    private void OnFootstep(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight < 0.5f) return;
+        if (_footstepSounds.Length > 0)
+            PlaySound(_footstepSounds[Random.Range(0, _footstepSounds.Length)]);
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip == null) return;
+        IServiceLocator.Instance.GetService<ISoundService>()
+            ?.PlayOneShot(clip, transform.position, _soundVolume);
     }
 }

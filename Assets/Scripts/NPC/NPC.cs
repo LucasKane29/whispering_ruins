@@ -52,6 +52,8 @@ public class NPC : MonoBehaviour, IInteractable
         _eventChannel?.Invoke(new Empty());
     }
 
+    public void SetDialogue(DialogueSO dialogue) => _dialogue = dialogue;
+
     public void OnFocus() => _outline.enabled = true;
     public void OnFocusLost() => _outline.enabled = false;
 }

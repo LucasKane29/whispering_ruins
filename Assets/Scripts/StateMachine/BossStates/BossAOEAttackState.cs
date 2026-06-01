@@ -23,7 +23,7 @@ public class BossAOEAttackState : BossBaseState
         _warningPrefab   = agent.AoeWarningPrefab;
         _warningDuration = agent.AoeWarningDuration;
 
-        agent.OnAOEAnimationEvent += () => { if (_isActive) SpawnAOE(); };
+        agent.OnAOEAnimationEvent += () => { if (_isActive) { SpawnAOE(); agent.PlaySound(agent.AoeAttackSound); } };
     }
 
     public override void OnEnter()
@@ -108,7 +108,8 @@ public class BossAOEAttackState : BossBaseState
         _activeWarning = Object.Instantiate(
             _warningPrefab,
             agent.transform.position,
-            agent.transform.rotation);
+            agent.transform.rotation,
+            agent.transform);
     }
 
     private void TrackPlayerWithSpawnPoint()

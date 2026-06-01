@@ -20,6 +20,12 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     [Tooltip("Прискорення та сповільнення")]
     [SerializeField] private float _speedChangeRate = 10.0f;
 
+    [Header("Серцебиття")]
+    [SerializeField] private AudioClip _heartbeatClip;
+    [Range(0f, 1f)][SerializeField] private float _heartbeatVolume = 0.8f;
+    [SerializeField] private float _lowHealthThreshold = 0.25f;
+
+    [Header("Звуки")]
     [SerializeField] private AudioClip _landingAudioClip;
     [SerializeField] private AudioClip[] _footstepAudioClips;
     [SerializeField] private AudioClip[] _swordAttackAudioClips;
@@ -68,6 +74,9 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     [SerializeField] private float _sprintStaminaCost = 2f;
     [SerializeField] private float _jumpStaminaCost = 5f;
     [SerializeField] private float _hurtDuration = 0.5f;
+    [SerializeField] private float _danceDuration = 5f;
+    [SerializeField] private float _deathLingerDuration = 2f;
+    [SerializeField] private EventChannel _talkedToNPCChannel;
 
     private const float _terminalVelocity = 53.0f;
     private float _verticalVelocity;
@@ -90,6 +99,7 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
 
     public bool IsHurt { get; set; }
     public bool IsDead { get; private set; }
+    public bool IsDancing { get; set; }
 
     public bool Grounded => _grounded;
     public float JumpHeight => _jumpHeight;
@@ -108,6 +118,7 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     public static float TerminalVelocity => _terminalVelocity;
 
     private Health _health;
+    private AudioSource _heartbeatSource;
 
     private Stamina _stamina;
     private CameraService _cameraService;
@@ -140,6 +151,8 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     {
         DialogueManager.Instance.OnDialogueStarted -= BlockInput;
         DialogueManager.Instance.OnDialogueEnded -= UnblockInput;
+        if (_talkedToNPCChannel != null)
+            _talkedToNPCChannel.OnEventRaised -= OnTalkedToNPC;
     }
 
     private void BlockInput()
@@ -211,7 +224,18 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         {
             _health.OnDamaged += () => IsHurt = true;
             _health.OnDeath   += () => IsDead = true;
+            _health.OnHealthChanged += HandleHeartbeat;
+            _health.OnDeath         += StopHeartbeat;
         }
+
+        _heartbeatSource = gameObject.AddComponent<AudioSource>();
+        _heartbeatSource.clip = _heartbeatClip;
+        _heartbeatSource.loop = true;
+        _heartbeatSource.spatialBlend = 0f;
+        _heartbeatSource.volume = _heartbeatVolume;
+        _heartbeatSource.playOnAwake = false;
+        if (_talkedToNPCChannel != null)
+            _talkedToNPCChannel.OnEventRaised += OnTalkedToNPC;
 
         _cameraService = IServiceLocator.Instance.GetService<CameraService>();
         if (_mainCamera == null)
@@ -233,18 +257,27 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         var jumpState       = new JumpState(this, _animator, _stamina, _jumpStaminaCost);
         var attackState     = new PlayerAttackState(this, _animator);
         var hurtState       = new PlayerHurtState(this, _animator, _hurtDuration);
-        var dieState        = new PlayerDieState(this, _animator);
+        var dieState        = new PlayerDieState(this, _animator, _deathLingerDuration);
+        var danceState      = new PlayerDanceState(this, _animator, _danceDuration);
 
         At(locomotionState, jumpState, new FunctionPredicate(() => _grounded && _input.jump && _jumpTimeoutDelta <= 0f && (_stamina != null && _stamina.HasEnoughStamina(_jumpStaminaCost))));
         At(jumpState, locomotionState, new FunctionPredicate(() => _grounded && _verticalVelocity <= 0f));
         At(locomotionState, attackState, new FunctionPredicate(() => !_attackCooldownTimer.IsRunning && _input.attack && (_stamina != null && _stamina.HasEnoughStamina(_attackStaminaCost))));
         At(attackState, locomotionState, new FunctionPredicate(() => !_attackCooldownTimer.IsRunning));
         At(hurtState, locomotionState, new FunctionPredicate(() => !IsHurt));
-        Any(hurtState, new FunctionPredicate(() => IsHurt && !IsDead));
-        Any(dieState,  new FunctionPredicate(() => IsDead));
+        At(danceState, locomotionState, new FunctionPredicate(() => !IsDancing));
+        Any(hurtState,  new FunctionPredicate(() => IsHurt && !IsDead));
+        Any(dieState,   new FunctionPredicate(() => IsDead));
+        Any(danceState, new FunctionPredicate(() => IsDancing && !IsDead && !IsHurt));
         Any(locomotionState, new FunctionPredicate(ReturnToLocomotionState));
 
         _stateMachine.SetState(locomotionState);
+    }
+
+    private void OnTalkedToNPC(Empty _)
+    {
+        if (GameManager.Instance.IsFinalBossKilled)
+            IsDancing = true;
     }
 
     private bool ReturnToLocomotionState()
@@ -263,6 +296,8 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
 
     private void Update()
     {
+        if (SceneController.IsLoading) return;
+
         if (_input.inventory)
         {
             _inventoryUIService ??= IServiceLocator.Instance.GetService<IInventoryUIService>() as InventoryUIService;
@@ -392,6 +427,25 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - _groundedOffset, transform.position.z), _groundedRadius);
         Vector3 attackPosition = transform.position + transform.forward;
         Gizmos.DrawSphere(attackPosition, _attackRange);
+    }
+
+    private void HandleHeartbeat(float percentage)
+    {
+        if (percentage > 0f && percentage < _lowHealthThreshold)
+        {
+            if (!_heartbeatSource.isPlaying)
+                _heartbeatSource.Play();
+        }
+        else
+        {
+            StopHeartbeat();
+        }
+    }
+
+    private void StopHeartbeat()
+    {
+        if (_heartbeatSource != null && _heartbeatSource.isPlaying)
+            _heartbeatSource.Stop();
     }
 
     private void OnFootstep(AnimationEvent animationEvent)

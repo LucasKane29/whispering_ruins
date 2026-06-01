@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -38,6 +37,23 @@ public class BossController : MonoBehaviour, IStatable
     [SerializeField] private float _emergeSampleRadius = 5f;
     [SerializeField] private string _bossName = string.Empty;
     [SerializeField] private EventChannel _onBossKilled;
+    [SerializeField] private PuzzleReward[] _rewards;
+    [SerializeField] private float _deathLingerDuration = 5f;
+    [SerializeField] private AudioClip _bossMusicClip;
+    [SerializeField] private float _bossMusicFadeDuration = 1f;
+
+    [Header("Sounds")]
+    [SerializeField] private AudioClip _hurtSound;
+    [SerializeField] private AudioClip _deathSound;
+    [SerializeField] private AudioClip _meleeAttackSound;
+    [SerializeField] private AudioClip _mediumRangeAttackSound;
+    [SerializeField] private AudioClip _rangedAttackSound;
+    [SerializeField] private AudioClip _aoeAttackSound;
+    [SerializeField] private AudioClip _phaseTransitionSound;
+    [SerializeField] private AudioClip _burrowSound;
+    [SerializeField] private AudioClip _emergeSound;
+    [Range(0f, 1f)][SerializeField] private float _soundVolume = 1f;
+    [Range(0f, 1f)][SerializeField] private float _musicVolume = 1f;
 
     public event Action OnDeathAnimationComplete;
     public event Action OnBossActivated;
@@ -111,7 +127,7 @@ public class BossController : MonoBehaviour, IStatable
         var phase2State = new BossPhase2State(this, _agent, _animator, _playerDetector);
         var phaseTransitionState = new BossPhaseTransitionState(this, _agent, _animator);
         var hurtState = new BossHurtState(this, _agent, _animator);
-        var dieState = new BossDieState(this, _agent, _animator);
+        var dieState = new BossDieState(this, _agent, _animator, _deathLingerDuration);
 
         Any(phaseTransitionState, new FunctionPredicate(() =>
             ShouldTransitionPhase &&
@@ -165,14 +181,21 @@ public class BossController : MonoBehaviour, IStatable
         }
         IsHurt = true;
         _hurtTimer.Start();
+        PlaySound(_hurtSound);
     }
 
-    private void HandleDeath() => IsDead = true;
+    private void HandleDeath()
+    {
+        IsDead = true;
+        PlaySound(_deathSound);
+    }
 
     public void ActivateBoss()
     {
         _isActivated = true;
         OnBossActivated?.Invoke();
+        if (_bossMusicClip != null)
+            IServiceLocator.Instance.GetService<ISoundService>()?.PlayMusic(_bossMusicClip, _bossMusicFadeDuration, true, _musicVolume);
     }
 
     public void RollNextAttack()
@@ -204,7 +227,24 @@ public class BossController : MonoBehaviour, IStatable
     {
         OnDeathAnimationComplete?.Invoke();
         _onBossKilled?.Invoke(new Empty());
+        foreach (var reward in _rewards)
+            reward?.Give();
     }
 
     public void AOESpawnEvent() => OnAOEAnimationEvent?.Invoke();
+
+    public AudioClip BurrowSound           => _burrowSound;
+    public AudioClip EmergeSound           => _emergeSound;
+    public AudioClip MeleeAttackSound      => _meleeAttackSound;
+    public AudioClip MediumRangeAttackSound => _mediumRangeAttackSound;
+    public AudioClip RangedAttackSound     => _rangedAttackSound;
+    public AudioClip AoeAttackSound        => _aoeAttackSound;
+    public AudioClip PhaseTransitionSound  => _phaseTransitionSound;
+
+    public void PlaySound(AudioClip clip)
+    {
+        if (clip == null) return;
+        IServiceLocator.Instance.GetService<ISoundService>()
+            ?.PlayOneShot(clip, transform.position, _soundVolume);
+    }
 }

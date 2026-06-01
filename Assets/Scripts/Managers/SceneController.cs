@@ -24,6 +24,8 @@ public class SceneController : MonoBehaviour
     private string _activeSlot;
     private bool _isBusy = false;
 
+    public static bool IsLoading { get; private set; }
+
     public IEnumerable<string> GetLoadedSlots() => _loadedScene.Keys.ToList();
 
     public SceneTransitionPlan NewTransitions()
@@ -40,12 +42,15 @@ public class SceneController : MonoBehaviour
 
     private IEnumerator ChangeSceneRoutine(SceneTransitionPlan plan)
     {
-        IServiceLocator.Instance.GetService<ISaveService>()?.PrepareTransit();
+        if (!plan.SkipSave)
+            IServiceLocator.Instance.GetService<ISaveService>()?.PrepareTransit();
 
         if(plan.Overlay)
         {
             yield return _loadingOverlay.FadeInBlack();
-            yield return new WaitForSeconds(0.5f);
+            Time.timeScale = 0f;
+            IsLoading = true;
+            yield return new WaitForSecondsRealtime(0.5f);
         }
         foreach (var scene in plan.ScenesToUnload)
         {
@@ -62,10 +67,13 @@ public class SceneController : MonoBehaviour
 
         if(plan.Overlay)
         {
-            yield return _loadingOverlay.FadeOutBlack();
+            IsLoading = false;
+            yield return _loadingOverlay.FadeOutBlack(plan.SkipMinimumDisplay);
+            Time.timeScale = 1f;
         }
 
-        IServiceLocator.Instance.GetService<ISaveService>()?.Save();
+        if (!plan.SkipSave)
+            IServiceLocator.Instance.GetService<ISaveService>()?.Save();
 
         _isBusy = false;
     }
@@ -80,6 +88,8 @@ public class SceneController : MonoBehaviour
             yield return null;
         }
         loadOperation.allowSceneActivation = true;
+        while (!loadOperation.isDone)
+            yield return null;
         if (setActive)
         {
             Scene newScene = SceneManager.GetSceneByName(sceneName);
@@ -126,6 +136,8 @@ public class SceneController : MonoBehaviour
         public string ActiveSceneName { get; private set; } = string.Empty;
         public bool ClearUnusedAssets { get; private set; } = false;
         public bool Overlay { get; private set; } = false;
+        public bool SkipMinimumDisplay { get; private set; } = false;
+        public bool SkipSave { get; private set; } = false;
         public SceneTransitionPlan Load(string slotKey, string sceneName, bool setActive = false)
         {
             ScenesToLoad.Add(slotKey, sceneName);
@@ -148,6 +160,18 @@ public class SceneController : MonoBehaviour
             return this;
         }
 
+        public SceneTransitionPlan WithoutMinimumDisplay()
+        {
+            SkipMinimumDisplay = true;
+            return this;
+        }
+
+        public SceneTransitionPlan WithoutSave()
+        {
+            SkipSave = true;
+            return this;
+        }
+
         public SceneTransitionPlan WithClearUnusedAssets()
         {
             ClearUnusedAssets = true;
@@ -160,6 +184,8 @@ public class SceneController : MonoBehaviour
         }
 
     }
+
+    public Coroutine FadeToBlack() => StartCoroutine(_loadingOverlay.FadeInBlack());
 
     public string GetSlotForActiveScene() => _activeSlot;
 

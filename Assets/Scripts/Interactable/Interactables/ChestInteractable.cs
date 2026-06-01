@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,6 +16,12 @@ public class ChestInteractable : MonoBehaviour, IInteractable
     [SerializeField] private float _openAngleX = 60f;
     [SerializeField] private float _openDuration = 0.6f;
     [SerializeField] private AnimationCurve _openCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+    [SerializeField] private AudioClip _openSound;
+    [SerializeField] private AudioClip _lootSound;
+    [Range(0f, 1f)][SerializeField] private float _soundVolume = 1f;
+
+    [SerializeField] private GameObject _contentObject;
 
     [SerializeField] private Renderer _interiorRenderer;
 
@@ -99,6 +103,7 @@ public class ChestInteractable : MonoBehaviour, IInteractable
     private IEnumerator OpenLidRoutine()
     {
         _isOpened = true;
+        IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_openSound, transform.position, _soundVolume);
         float elapsed = 0f;
         Quaternion startRot = _lid.localRotation;
         Quaternion targetRot = startRot * Quaternion.Euler(_openAngleX, 0f, 0f);
@@ -117,6 +122,10 @@ public class ChestInteractable : MonoBehaviour, IInteractable
 
         foreach (var item in _items)
             _inventory.Add(item);
+
+        IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_lootSound, transform.position, _soundVolume);
+        if (_contentObject != null)
+            _contentObject.SetActive(false);
     }
 
     private IEnumerator EmissionRoutine()

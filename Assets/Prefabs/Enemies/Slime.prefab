@@ -512,13 +512,24 @@ MonoBehaviour:
   _agent: {fileID: 5288034251379313678}
   _animator: {fileID: 95457531584545886}
   _wanderRadius: 5
-  _playerDetector: {fileID: 564583027476473030}
   _attackCooldown: 1
   _attackRange: 1
   _attackDamage: 5
   _hurtCooldown: 1
   _deathScore: 50
   _channel: {fileID: 11400000, guid: b86aeefb9dcb0cd4fb1f53c4470d33cd, type: 2}
+  _hurtSound: {fileID: 8300000, guid: c27f66fb4fd1f324d9c346f8f13503cc, type: 3}
+  _deathSound: {fileID: 8300000, guid: ff4b639d706f17742946eb1cd844403a, type: 3}
+  _attackSounds:
+  - {fileID: 8300000, guid: d0c52496e2beb104693111c88fe69f19, type: 3}
+  - {fileID: 8300000, guid: 1ffeaf1da7570144cb6b35e991b3e6dc, type: 3}
+  - {fileID: 8300000, guid: 9f97b1440e470ba478cc86ea478408d4, type: 3}
+  _footstepSounds:
+  - {fileID: 8300000, guid: 616421c8d77ee4e44a0d72886ba24f73, type: 3}
+  - {fileID: 8300000, guid: 444e6ee651708c24a9687222caf910f2, type: 3}
+  - {fileID: 8300000, guid: 48dd83704a0880844957baeb8bfc1fcd, type: 3}
+  - {fileID: 8300000, guid: e094b01397e0f7f45b1c3084991a2273, type: 3}
+  _soundVolume: 1
 --- !u!135 &737394471332896104
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -569,6 +580,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 30
+  _invincibilityDuration: 0
   _channel: {fileID: 11400000, guid: 883bc8cb446b9d844abd6593f420cf22, type: 2}
 --- !u!1 &132164327165073970
 GameObject:

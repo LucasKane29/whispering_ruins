@@ -11,6 +11,8 @@ public class UseTarget : StatefulPuzzleElement, IInteractable
 
     [SerializeField] private AudioClip _wrongItemSound;
     [SerializeField] private AudioClip _correctItemSound;
+    [SerializeField] private AudioClip _insertSound;
+    [Range(0f, 1f)][SerializeField] private float _soundVolume = 1f;
 
     [SerializeField] private string _promptText = string.Empty;
     [SerializeField] private string _interactHintText = string.Empty;
@@ -94,7 +96,7 @@ public class UseTarget : StatefulPuzzleElement, IInteractable
             _used = true;
             RaiseStateChanged();
             if (_correctItemSound != null)
-                AudioSource.PlayClipAtPoint(_correctItemSound, transform.position);
+                IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_correctItemSound, transform.position, _soundVolume);
             _onCorrectItemUsed?.Invoke(item);
             _insertedItem = item;
             SpawnItemPrefab(item);
@@ -109,7 +111,7 @@ public class UseTarget : StatefulPuzzleElement, IInteractable
                 SpawnItemPrefab(item);
             }
             if (_wrongItemSound != null)
-                AudioSource.PlayClipAtPoint(_wrongItemSound, transform.position);
+                IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_wrongItemSound, transform.position, _soundVolume);
             _onWrongItemUsed?.Invoke(item);
         }
 
@@ -122,6 +124,8 @@ public class UseTarget : StatefulPuzzleElement, IInteractable
         _spawnedPrefab = Instantiate(item.prefab, _socketPoint.position, _socketPoint.rotation, _socketPoint);
         foreach (var col in _spawnedPrefab.GetComponentsInChildren<Collider>(true))
             col.enabled = false;
+        if (_insertSound != null)
+            IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_insertSound, transform.position, _soundVolume);
         _onItemInsertedIntoSocket?.Invoke(_spawnedPrefab);
     }
 

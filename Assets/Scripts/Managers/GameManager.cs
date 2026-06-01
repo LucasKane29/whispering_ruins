@@ -63,7 +63,9 @@ public class GameManager : MonoBehaviour
         var plan = SceneController.Instance
             .NewTransitions()
             .Load(SceneDatabase.Slots.GameOver, SceneDatabase.Scenes.GameOver, setActive: true)
-            .WithOverlay();
+            .WithOverlay()
+            .WithoutMinimumDisplay()
+            .WithoutSave();
 
         foreach (var slot in SceneController.Instance.GetLoadedSlots())
         {

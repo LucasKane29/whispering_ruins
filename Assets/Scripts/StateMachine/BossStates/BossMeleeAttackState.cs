@@ -55,6 +55,7 @@ public class BossMeleeAttackState : BossBaseState
         {
             _hasDealtDamage = true;
             playerDetector.PlayerHealth.TakeDamage(agent.MeleeDamage);
+            agent.PlaySound(agent.MeleeAttackSound);
         }
 
         if (stateInfo.normalizedTime >= 1f && !animator.IsInTransition(0))

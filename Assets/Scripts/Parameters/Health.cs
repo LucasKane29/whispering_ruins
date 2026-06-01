@@ -4,11 +4,13 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
     [SerializeField] private float _maxHealth = 100f;
+    [SerializeField] private float _invincibilityDuration = 0f;
     [SerializeField] FloatEventChannel _channel;
     public Action<float> OnHealthChanged;
     public Action OnDeath;
     public Action OnDamaged;
     private float _currentHealth;
+    private float _invincibilityTimer;
     private bool _initialized;
 
     public bool IsDead => _currentHealth <= 0;
@@ -19,6 +21,12 @@ public class Health : MonoBehaviour
     {
         if (!_initialized)
             _currentHealth = _maxHealth;
+    }
+
+    void Update()
+    {
+        if (_invincibilityTimer > 0f)
+            _invincibilityTimer -= Time.deltaTime;
     }
 
     private void Start()
@@ -34,9 +42,14 @@ public class Health : MonoBehaviour
         PublishHealthPercentage();
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, bool triggerHurt = true)
     {
         if (IsDead) return;
+        if (triggerHurt && _invincibilityTimer > 0f) return;
+
+        if (triggerHurt && _invincibilityDuration > 0f)
+            _invincibilityTimer = _invincibilityDuration;
+
         _currentHealth -= damage;
 
         OnHealthChanged?.Invoke(_currentHealth / _maxHealth);
@@ -46,7 +59,7 @@ public class Health : MonoBehaviour
             _currentHealth = Mathf.Max(0, _currentHealth);
             OnDeath?.Invoke();
         }
-        else
+        else if (triggerHurt)
         {
             OnDamaged?.Invoke();
         }

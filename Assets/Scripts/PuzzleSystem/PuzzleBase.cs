@@ -16,6 +16,10 @@ public abstract class PuzzleBase : MonoBehaviour
     [SerializeField] protected PuzzleElement[] elements;
     [SerializeField] protected PuzzleReward[] rewards;
 
+    [Header("Sound")]
+    [SerializeField] private AudioClip _solvedSound;
+    [Range(0f, 1f)][SerializeField] private float _solvedSoundVolume = 1f;
+
     [Header("Events")]
     public UnityEvent OnPuzzleStarted;
     public UnityEvent OnPuzzleSolved;
@@ -44,6 +48,8 @@ public abstract class PuzzleBase : MonoBehaviour
     {
         ChangeState(PuzzleState.Solved);
         OnPuzzleSolved?.Invoke();
+        if (_solvedSound != null)
+            IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_solvedSound, transform.position, _solvedSoundVolume);
         foreach (var reward in rewards)
             reward.Give();
     }

@@ -56,6 +56,7 @@ public class BossRangedAttackState : BossBaseState
         {
             _hasSpawnedProjectile = true;
             SpawnProjectile();
+            agent.PlaySound(agent.RangedAttackSound);
         }
 
         if (stateInfo.normalizedTime >= 1f && !animator.IsInTransition(0))

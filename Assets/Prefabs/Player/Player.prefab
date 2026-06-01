@@ -674,6 +674,9 @@ MonoBehaviour:
   _sprintSpeed: 5.335
   _rotationSmoothTime: 0.12
   _speedChangeRate: 10
+  _heartbeatClip: {fileID: 8300000, guid: 91a37878884ddad4d84883fcf06a674b, type: 3}
+  _heartbeatVolume: 1
+  _lowHealthThreshold: 0.25
   _landingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   _footstepAudioClips:
   - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
@@ -692,8 +695,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: d6abc8dd78a8ca64fb7ff2bdf27d82c6, type: 3}
   - {fileID: 8300000, guid: 080da37a90163da4ba4adc49ec1c609c, type: 3}
   - {fileID: 8300000, guid: 1ba4aaa80fcbc3d4b84c31cd99572dfd, type: 3}
-  _footstepAudioVolume: 0.5
-  _swordAttackAudioVolume: 0.5
+  _footstepAudioVolume: 1
+  _swordAttackAudioVolume: 1
   _jumpHeight: 1.2
   _gravity: -15
   _jumpTimeout: 0.5
@@ -708,6 +711,11 @@ MonoBehaviour:
   _attackStaminaCost: 10
   _sprintStaminaCost: 0.5
   _jumpStaminaCost: 5
+  _hurtDuration: 0.5
+  _danceDuration: 5
+  _deathLingerDuration: 2
+  _talkedToNPCChannel: {fileID: 11400000, guid: 41350da6f0c616b44999de83a6ae9878,
+    type: 2}
 --- !u!114 &7828998098316511099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -863,6 +871,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 500
+  _invincibilityDuration: 0
   _channel: {fileID: 11400000, guid: 6937fb861d6594c4aa310371edf390ca, type: 2}
 --- !u!114 &7197058250202531832
 MonoBehaviour:

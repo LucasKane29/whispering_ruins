@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _lines:
   - _speakerName: Elder Thomas
-    _dialogueText: Hello, young boy!
+    _dialogueText: The Light is dying, traveler.
   - _speakerName: Elder Thomas
-    _dialogueText: This is test text for you.
+    _dialogueText: Deep beneath these ruins, the Great Worm has awakened.
   - _speakerName: Elder Thomas
-    _dialogueText: You can skip it if you want
+    _dialogueText: Its corruption spreads through the ancient tunnels and feeds upon
+      the Crystal of Dawn.
   - _speakerName: Elder Thomas
-    _dialogueText: You are welcome!
+    _dialogueText: If the crystal falls, darkness will claim this world.
+  - _speakerName: Elder Thomas
+    _dialogueText: Enter the dungeon, defeat the beast, and restore the Light before
+      it is too late."

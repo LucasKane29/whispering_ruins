@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1aef64daab5834a84b1e06c3e1d82d, type: 3}
+  m_Name: Tablet3
+  m_EditorClassIdentifier: 
+  _lines:
+  - _speakerName: Tablet III
+    _dialogueText: Now the Great Worm awakens.
+  - _speakerName: Tablet III
+    _dialogueText: Its hunger grows with every tremor. The crystals pulse with its
+      heartbeat, and the ruins shake beneath its wrath. Should it rise from the depths,
+      nothing upon the surface will endure.

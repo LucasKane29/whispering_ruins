@@ -9,7 +9,8 @@ public class Door : MonoBehaviour
     [SerializeField] private GameObject _light;
     [SerializeField] private EventChannel _eventChannel;
 
-    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _openSound;
+    [Range(0f, 1f)][SerializeField] private float _soundVolume = 1f;
     [SerializeField] private UnityEvent _onOpened;
     [SerializeField] private float _openedAngle = 230f;
 
@@ -43,6 +44,7 @@ public class Door : MonoBehaviour
     private IEnumerator OpenRoutine()
     {
         _isOpening = true;
+        IServiceLocator.Instance.GetService<ISoundService>()?.PlayOneShot(_openSound, transform.position, _soundVolume);
         float startAngle = _door.transform.eulerAngles.y;
         float elapsed = 0f;
 

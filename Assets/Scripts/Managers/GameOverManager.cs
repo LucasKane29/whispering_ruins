@@ -29,6 +29,7 @@ public class GameOverManager : MonoBehaviour
             .Load(SceneDatabase.Slots.Hub, SceneDatabase.Scenes.Hub, setActive: true)
             .Unload(SceneDatabase.Slots.GameOver)
             .WithOverlay()
+            .WithoutSave()
             .Perform();
     }
 
@@ -39,6 +40,7 @@ public class GameOverManager : MonoBehaviour
             .Load(SceneDatabase.Slots.MainMenu, SceneDatabase.Scenes.MainMenu, setActive: true)
             .Unload(SceneDatabase.Slots.GameOver)
             .WithOverlay()
+            .WithoutSave()
             .Perform();
     }
 }
