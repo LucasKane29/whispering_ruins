@@ -35,6 +35,7 @@ public class BossController : MonoBehaviour, IStatable
     [SerializeField] private float _rangedAttackRange = 12f;
     [SerializeField] private float _aoeDamage = 25f;
     [SerializeField] private float _emergeSampleRadius = 5f;
+    [SerializeField] private float _emergeKnockbackForce = 8f;
     [SerializeField] private string _bossName = string.Empty;
     [SerializeField] private EventChannel _onBossKilled;
     [SerializeField] private PuzzleReward[] _rewards;
@@ -100,6 +101,7 @@ public class BossController : MonoBehaviour, IStatable
     public float UndergroundSpeed => _undergroundSpeed;
     public float ArrivalThreshold => _arrivalThreshold;
     public float EmergeSampleRadius => _emergeSampleRadius;
+    public float EmergeKnockbackForce => _emergeKnockbackForce;
     public GameObject AoePrefab => _aoePrefab;
     public PlayerDetector PlayerDetector => _playerDetector;
 

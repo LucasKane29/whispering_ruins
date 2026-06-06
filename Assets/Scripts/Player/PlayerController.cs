@@ -74,6 +74,8 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     [SerializeField] private float _sprintStaminaCost = 2f;
     [SerializeField] private float _jumpStaminaCost = 5f;
     [SerializeField] private float _hurtDuration = 0.5f;
+    [SerializeField] private float _invincibilityDuration = 1f;
+    [SerializeField] private float _knockbackDecay = 10f;
     [SerializeField] private float _danceDuration = 5f;
     [SerializeField] private float _deathLingerDuration = 2f;
     [SerializeField] private EventChannel _talkedToNPCChannel;
@@ -125,6 +127,8 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
 
     private bool _inputBlocked;
     private InventoryUIService _inventoryUIService;
+    private Renderer[] _renderers;
+    private Vector3 _knockbackVelocity;
     public float JumpTimeoutDelta
     {
         get => _jumpTimeoutDelta;
@@ -164,7 +168,15 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         _input.sprint = false;
         _input.jump = false;
         _speed = 0f;
+        _animationBlend = 0f;
         _input.inventory = false;
+        if (_hasAnimator)
+        {
+            _animator.SetFloat(PlayerAnimIDs.Speed, 0f);
+            _animator.SetFloat(PlayerAnimIDs.MotionSpeed, 0f);
+            _animator.SetBool(PlayerAnimIDs.Jump, false);
+            _animator.SetBool(PlayerAnimIDs.FreeFall, false);
+        }
     }
 
     private void UnblockInput()
@@ -220,9 +232,10 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         _attackCooldownTimer.OnTimerStop += () => _input.attack = false;
         _health = GetComponent<Health>();
         _stamina = GetComponent<Stamina>();
+        _renderers = GetComponentsInChildren<Renderer>();
         if (_health != null)
         {
-            _health.OnDamaged += () => IsHurt = true;
+            _health.OnDamaged += HandlePlayerDamaged;
             _health.OnDeath   += () => IsDead = true;
             _health.OnHealthChanged += HandleHeartbeat;
             _health.OnDeath         += StopHeartbeat;
@@ -277,7 +290,10 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     private void OnTalkedToNPC(Empty _)
     {
         if (GameManager.Instance.IsFinalBossKilled)
+        {
+            IsHurt = false;
             IsDancing = true;
+        }
     }
 
     private bool ReturnToLocomotionState()
@@ -288,7 +304,8 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
             && !_input.attack
             && _verticalVelocity <= 0f
             && !IsHurt
-            && !IsDead;
+            && !IsDead
+            && !IsDancing;
     }
 
     public void At(IState from, IState to, IPredicate condition) => _stateMachine.AddTransition(from, to, condition);
@@ -301,17 +318,25 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         if (_input.inventory)
         {
             _inventoryUIService ??= IServiceLocator.Instance.GetService<IInventoryUIService>() as InventoryUIService;
-            _inventoryUIService?.Open();
+            if (_inventoryUIService != null)
+            {
+                if (_inventoryUIService.IsOpen)
+                    _inventoryUIService.Close();
+                else
+                    _inventoryUIService.Open();
+            }
         }
         GroundedCheck();
         if (_inputBlocked)
         {
             ApplyGravityOnly();
+            ApplyAndDecayKnockback();
             return;
-        } 
-            
+        }
+
         _stateMachine.Update();
         _attackCooldownTimer.Tick(Time.deltaTime);
+        ApplyAndDecayKnockback();
     }
 
     internal void HandleMovement()
@@ -419,6 +444,38 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
         _controller.Move(new Vector3(0f, _verticalVelocity, 0f) * Time.deltaTime);
     }
 
+    public void ApplyKnockback(Vector3 force) => _knockbackVelocity = force;
+
+    private void ApplyAndDecayKnockback()
+    {
+        if (_knockbackVelocity.sqrMagnitude <= 0.01f)
+        {
+            _knockbackVelocity = Vector3.zero;
+            return;
+        }
+        _controller.Move(_knockbackVelocity * Time.deltaTime);
+        _knockbackVelocity = Vector3.MoveTowards(_knockbackVelocity, Vector3.zero, _knockbackDecay * Time.deltaTime);
+    }
+
+    private void HandlePlayerDamaged()
+    {
+        IsHurt = true;
+        _health.ActivateInvincibility(_invincibilityDuration);
+        StartCoroutine(InvincibilityBlinkCoroutine(_invincibilityDuration, 0.1f));
+    }
+
+    private IEnumerator InvincibilityBlinkCoroutine(float duration, float interval)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration && !IsDead)
+        {
+            foreach (var r in _renderers) r.enabled = !r.enabled;
+            yield return new WaitForSeconds(interval);
+            elapsed += interval;
+        }
+        foreach (var r in _renderers) r.enabled = true;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
@@ -469,8 +526,8 @@ public class PlayerController : MonoBehaviour, IStatable, IPlayerService
     private IEnumerator UnblockNextFrame()
     {
         _input.attack = false;
-        yield return null;
         _inputBlocked = false;
+        yield return null;
         _input.enabled = true;
     }
 }

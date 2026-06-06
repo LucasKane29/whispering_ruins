@@ -29,10 +29,13 @@ public class JumpState : BaseState<PlayerController>
     {
         agent.JumpTimeoutDelta = agent.JumpTimeout;
 
-        if (agent.FallTimeoutDelta >= 0f)
-            agent.FallTimeoutDelta -= Time.deltaTime;
-        else if (agent.HasAnimator)
-            animator.SetBool(PlayerAnimIDs.FreeFall, true);
+        if (agent.VerticalVelocity <= 0f)
+        {
+            if (agent.FallTimeoutDelta >= 0f)
+                agent.FallTimeoutDelta -= Time.deltaTime;
+            else if (agent.HasAnimator)
+                animator.SetBool(PlayerAnimIDs.FreeFall, true);
+        }
 
         agent.Input.jump = false;
 

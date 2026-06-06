@@ -44,17 +44,17 @@ PrefabInstance:
     - target: {fileID: 5576951203052616077, guid: 630ad80e4f1d42e4397fb75fefd7f143,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.7922797
+      value: -14.4807
       objectReference: {fileID: 0}
     - target: {fileID: 5576951203052616077, guid: 630ad80e4f1d42e4397fb75fefd7f143,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.110763
+      value: 15.714408
       objectReference: {fileID: 0}
     - target: {fileID: 5576951203052616077, guid: 630ad80e4f1d42e4397fb75fefd7f143,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.79228
+      value: -14.480701
       objectReference: {fileID: 0}
     - target: {fileID: 5576951203052616077, guid: 630ad80e4f1d42e4397fb75fefd7f143,
         type: 3}
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_TargetMovementOnly: 1
   m_ScreenX: 0.5
   m_ScreenY: 0.5
-  m_CameraDistance: 10
+  m_CameraDistance: 25
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
   m_DeadZoneDepth: 0
@@ -243,6 +243,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _interactableLayer.m_Bits
       value: 3968
+      objectReference: {fileID: 0}
+    - target: {fileID: 8403772649316609188, guid: 40ae4f4086355f7428a6c65ea4824955,
+        type: 3}
+      propertyPath: _invincibilityDuration
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

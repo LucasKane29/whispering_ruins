@@ -34,7 +34,7 @@ public class BossProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_ignoreTimer > 0f && _isDestroying) return;
+        if (_ignoreTimer > 0f || _isDestroying) return;
         _isDestroying = true;
         if (other.CompareTag("Player"))
             other.GetComponent<Health>()?.TakeDamage(_damage);

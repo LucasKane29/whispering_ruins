@@ -45,6 +45,7 @@ public class PauseService : MonoBehaviour, IPauseService
 
     public void Pause()
     {
+        if (SceneController.IsLoading) return;
         var currentScene = SceneController.Instance.GetActiveSceneName() ?? string.Empty;
         if (_nonGameplayScenes.Contains(currentScene) || _excludedScenesSet.Contains(currentScene))
             return;

@@ -75,8 +75,10 @@ public class Stamina : MonoBehaviour
         _initialized = true;
         _currentStamina = Mathf.Clamp(value, 0f, _maxStamina);
         _isExhausted = false;
-        _regenTimer?.Stop();   // stop before reset so regen doesn't resume after regenDelay
+        _regenTimer?.Stop();
         _regenTimer?.Reset();
+        if (_currentStamina < _maxStamina)
+            _regenTimer?.Start();
         PublishStaminaPercentage();
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
     [SerializeField] private float _maxHealth = 100f;
-    [SerializeField] private float _invincibilityDuration = 0f;
+    [SerializeField] private float _invincibilityDuration = 1f;
     [SerializeField] FloatEventChannel _channel;
     public Action<float> OnHealthChanged;
     public Action OnDeath;
@@ -14,6 +14,10 @@ public class Health : MonoBehaviour
     private bool _initialized;
 
     public bool IsDead => _currentHealth <= 0;
+    public bool IsInvincible => _invincibilityTimer > 0f;
+    public float InvincibilityDuration => _invincibilityDuration;
+
+    public void ActivateInvincibility(float duration) => _invincibilityTimer = duration;
     public float CurrentHealth => _currentHealth;
     public float MaxHealth => _maxHealth;
 

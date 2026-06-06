@@ -697,7 +697,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 1ba4aaa80fcbc3d4b84c31cd99572dfd, type: 3}
   _footstepAudioVolume: 1
   _swordAttackAudioVolume: 1
-  _jumpHeight: 1.2
+  _jumpHeight: 0.5
   _gravity: -15
   _jumpTimeout: 0.5
   _fallTimeout: 0.15

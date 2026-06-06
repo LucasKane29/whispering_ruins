@@ -23,7 +23,7 @@ public class BossAOEEffect : MonoBehaviour
         if (_tickTimer <= 0f)
         {
             _tickTimer = _tickInterval;
-            other.GetComponent<Health>()?.TakeDamage(_damage, triggerHurt: false);
+            other.GetComponent<Health>()?.TakeDamage(_damage);
         }
     }
 }

@@ -35,12 +35,18 @@ public class GameOverManager : MonoBehaviour
 
     public void OnMainMenuClick()
     {
-        SceneController.Instance
+        var plan = SceneController.Instance
             .NewTransitions()
             .Load(SceneDatabase.Slots.MainMenu, SceneDatabase.Scenes.MainMenu, setActive: true)
-            .Unload(SceneDatabase.Slots.GameOver)
             .WithOverlay()
-            .WithoutSave()
-            .Perform();
+            .WithoutSave();
+
+        foreach (var slot in SceneController.Instance.GetLoadedSlots())
+        {
+            if (slot == SceneDatabase.Slots.Core) continue;
+            plan.Unload(slot);
+        }
+
+        plan.Perform();
     }
 }

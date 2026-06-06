@@ -7,4 +7,5 @@ public interface IPlayerService : IService
     Transform Transform { get; }
     Health Health { get; }
     Stamina Stamina { get; }
+    void ApplyKnockback(Vector3 force);
 }

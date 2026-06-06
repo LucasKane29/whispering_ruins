@@ -7,6 +7,9 @@ public class MainMenuManager : MonoBehaviour
 
     private void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         if (_continueButton != null)
         {
             var hasSave = IServiceLocator.Instance.GetService<ISaveService>()?.HasSave ?? false;

@@ -65,11 +65,18 @@ public class HubEndingController : MonoBehaviour
 
         yield return SceneController.Instance.FadeToBlack();
 
-        SceneController.Instance.NewTransitions()
+        var plan = SceneController.Instance.NewTransitions()
             .Load(SceneDatabase.Slots.Credits, SceneDatabase.Scenes.Credits, setActive: true)
             .WithOverlay()
             .WithoutMinimumDisplay()
-            .WithoutSave()
-            .Perform();
+            .WithoutSave();
+
+        foreach (var slot in SceneController.Instance.GetLoadedSlots())
+        {
+            if (slot == SceneDatabase.Slots.Core) continue;
+            plan.Unload(slot);
+        }
+
+        plan.Perform();
     }
 }

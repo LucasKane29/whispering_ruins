@@ -137,7 +137,14 @@ public class BossBurrowState : BaseState<BossController>
             var playerXZ = new Vector3(_playerDetector.Player.position.x, 0f, _playerDetector.Player.position.z);
             var bossXZ   = new Vector3(agent.transform.position.x, 0f, agent.transform.position.z);
             if (Vector3.Distance(playerXZ, bossXZ) <= _warningRadius)
+            {
                 _playerDetector.PlayerHealth.TakeDamage(agent.MeleeDamage);
+                var knockbackDir = (playerXZ - bossXZ).sqrMagnitude > 0.001f
+                    ? (playerXZ - bossXZ).normalized
+                    : agent.transform.forward;
+                IServiceLocator.Instance.GetService<IPlayerService>()
+                    ?.ApplyKnockback(knockbackDir * agent.EmergeKnockbackForce);
+            }
         }
 
         if (stateInfo.shortNameHash != BossAnimIDs.Emerge)
